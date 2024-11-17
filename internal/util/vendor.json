@@ -1,10 +1,10 @@
 {
-    plain: {
-        name: Alice,
-        email: alice@example.com
+    "plain": {
+        "name": "Alice",
+        "email": "alice@example.com"
     },
-    hash: {
-        password: mypassword123,
-        credit_card: 1234567812345678
+    "hash": {
+        "password": "mypassword123",
+        "credit_card": 1234567812345678
     }
 }
