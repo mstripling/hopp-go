@@ -3,8 +3,8 @@ package util
 import (
 	"crypto/sha256"
 	"encoding/hex"
-  "strconv"
-  "fmt"
+  	"strconv"
+  	"fmt"
 )
 
 
@@ -14,31 +14,32 @@ type Payload struct {
 }
 
 func Hash(p Payload) (map[string]interface{}, error) {
-  result := make(map[string]interface{})
-
-  for key, value := range p.Plain {
-    result[key] = value
-  }
-
-  for key, value := range p.Hash {
-    var strValue string
+    result := make(map[string]interface{})
+	
+    // Extracts keys and unhashed values
+    for key, value := range p.Plain {
+		result[key] = value
+	}
+	
+	// Extracts keys and hashes values before adding them to result
+    for key, value := range p.Hash {
+		var strValue string
    
-    // Type assertion: check if it's a string or int and convert to string
-		switch v := value.(type) {
-		case string:
-			strValue = v
-		case int:
-			strValue = strconv.Itoa(v) // Convert int to string
-    case float64:
-      strValue = fmt.Sprintf("%f", v) //convert float64 to string
-		default:
-			return nil, fmt.Errorf("unsupported value type for key '%s': %T", key, value)
-		}
+        // Type assertion to string
+        switch v := value.(type) {
+        case string:
+            strValue = v
+        case int:
+            strValue = strconv.Itoa(v)
+        case float64:
+            strValue = fmt.Sprintf("%f", v)
+        default:
+            return nil, fmt.Errorf("unsupported value type for key '%s': %T", key, value)
+            }
 
-    hash := sha256.Sum256([]byte(strValue))
-    result[key] = hex.EncodeToString(hash[:]) 
+        hash := sha256.Sum256([]byte(strValue))
+        result[key] = hex.EncodeToString(hash[:]) 
   }
 
   return result, nil
 }
-
