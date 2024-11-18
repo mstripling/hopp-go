@@ -1,53 +1,68 @@
-# Project hopp
+# Hopp 🐇
 
-One Paragraph of project description goes here
+Hash Ownership Ping Protocol (Hopp) implementation written in Go. 
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+#### 📄 Documentation needed.  
+#### 🚫 Testing and DB not currently supported.
 
-## MakeFile
 
-Run build make command with tests
+## 🛠️ Current Work in Progress
+#### - Adding database support for integration testing.  
+#### - Better documentation.  
+#### - Endpoint redirects
+
+
+## 🚀 Future Goals
+#### - Add full API documentation.  
+#### - Plugin/API for CRM during Bid phase of ping post
+#### - Implement a CLI tool and GUI  
+
+
+## Makefile
+
+### Run build make command with tests:  
 ```bash
 make all
 ```
 
-Build the application
+### Build the application:  
 ```bash
 make build
 ```
 
-Run the application
+### Run the application:  
 ```bash
 make run
 ```
-Create DB container
+
+### Create DB container:  
 ```bash
 make docker-run
 ```
 
-Shutdown DB Container
+### Shutdown DB container:  
 ```bash
 make docker-down
 ```
 
-DB Integrations Test:
+### DB Integration tests:  
 ```bash
 make itest
 ```
 
-Live reload the application:
+### Live reload the application:  
 ```bash
 make watch
 ```
 
-Run the test suite:
+### Run the test suite:  
 ```bash
 make test
 ```
 
-Clean up binary from the last build:
+### Clean up binary from the last build:  
 ```bash
 make clean
 ```
