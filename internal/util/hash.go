@@ -14,6 +14,7 @@ type RawPayload struct {
   Endpoint string              `json:"endpoint"`
 }
 
+
 func TransformAndFormat(p RawPayload) (map[string]interface{}, error) {
   pingBody := make(map[string]interface{})
 

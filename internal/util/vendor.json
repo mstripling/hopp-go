@@ -9,5 +9,6 @@
         "last_name": "Smith",
         "phone": 1234567890,
         "email": "alice.smith@email.com"
-    }
+    },
+    "endpoint": "https://smartfinancial.com"
 }
