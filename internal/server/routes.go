@@ -12,12 +12,18 @@ import (
 func (s *Server) RegisterRoutes() http.Handler {
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", s.HelloWorldHandler)
+	mux.HandleFunc("/", s.HomeHandler)
   mux.HandleFunc("/ping", s.VendorPingHandler)
   mux.HandleFunc("/buyer", s.BuyerBidHandlerTest)
 	mux.HandleFunc("/health", s.healthHandler)
+	mux.HandleFunc("/hello", s.HelloWorldHandler)
 
 	return mux
+}
+
+func (s *Server) HomeHandler (w http.ResponseWriter, r *http.Request) {
+  path := "frontend/public/index.html"
+  http.ServeFile(w, r, path)
 }
 
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +71,7 @@ func (s *Server) VendorPingHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, fmt.Sprintf("Invalid JSON: %s", err), http.StatusBadRequest)
         return 
     }
-
+    
     err = util.Initialize(w, r, vendorPayload)
     if err != nil {
       http.Error(w, fmt.Sprintf("%v", err), http.StatusInternalServerError)
@@ -77,14 +83,22 @@ func (s *Server) VendorPingHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error processing data: %s", err), http.StatusInternalServerError)
 		return
+	}	
+
+  jsonData, err := json.Marshal(processedPayload)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error marshalling data: %v", err), http.StatusInternalServerError)
+		return
 	}
 
   // Return positive response to vendor
   w.WriteHeader(http.StatusOK)
-  w.Write([]byte("Request processed successfully.....\nStandby for Buyer Response\n"))
-  fmt.Println(processedPayload)
-
-  resp, err := util.Ping(r, processedPayload)
+  w.Write([]byte("Request processed successfully.....\n"))
+  w.Write([]byte("Your Hopp payload:\n"))
+  w.Write([]byte(jsonData))
+  w.Write([]byte("\nStandby for Buyer Response\n"))
+  
+  resp, err := util.Ping(r, processedPayload, vendorPayload.Endpoint)
   if err != nil {
     http.Error(w, fmt.Sprintf("HTTP request error: %s", err), http.StatusBadRequest)
     return

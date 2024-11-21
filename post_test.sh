@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the URL and file path
-URL="http://localhost:8080/buyer"
+URL="http://localhost:8080/ping"
 FILE_PATH="internal/util/vendor.json"
 
 # Send the POST request

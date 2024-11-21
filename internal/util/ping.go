@@ -2,10 +2,18 @@ package util
 
 import(
   "net/http"
+  "bytes"
+  "encoding/json"
 )
 
-func Ping(r *http.Request, p map[string]interface{}) (*http.Response, error) {
-  req, err := http.NewRequest(r.Method, "http://localhost:8080/buyer", nil)
+func Ping(r *http.Request, p map[string]interface{}, e string) (*http.Response, error) {
+	// Convert the map to JSON
+	jsonData, err := json.Marshal(p)
+	if err != nil {
+		return nil, err
+	}  
+  
+  req, err := http.NewRequest(r.Method, e, bytes.NewReader(jsonData))
   if err != nil {
     return nil, err
   }
