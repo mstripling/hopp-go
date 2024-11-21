@@ -8,16 +8,17 @@ import (
 )
 
 
-type Payload struct {
+type RawPayload struct {
 	Plain map[string]interface{} `json:"plain"`
-	Hash map[string]interface{} `json:"hash"`
+	Hash map[string]interface{}  `json:"hash"`
+  Endpoint string              `json:"endpoint"`
 }
 
-func Hash(p Payload) (map[string]interface{}, error) {
-  result := make(map[string]interface{})
+func TransformAndFormat(p RawPayload) (map[string]interface{}, error) {
+  pingBody := make(map[string]interface{})
 
   for key, value := range p.Plain {
-    result[key] = value
+    pingBody[key] = value
   }
 
   for key, value := range p.Hash {
@@ -36,9 +37,9 @@ func Hash(p Payload) (map[string]interface{}, error) {
 		}
 
     hash := sha256.Sum256([]byte(strValue))
-    result[key] = hex.EncodeToString(hash[:]) 
+    pingBody[key] = hex.EncodeToString(hash[:]) 
   }
 
-  return result, nil
+  return pingBody, nil
 }
 
