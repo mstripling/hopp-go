@@ -6,33 +6,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Data</title>
     <style>
-        /* Style the text area to make it wider and rectangular */
+        /* Global Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #5C6BC0;
+            margin-top: 40px;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Styling for Textarea */
         #dataInput {
-            width: 100%;              /* Makes it span the full width of its container */
-            height: 300px;            /* Gives it a good height for multiline input */
-            padding: 10px;            /* Adds space inside the text box */
-            border: 1px solid #ccc;   /* Border color */
-            border-radius: 5px;       /* Optional: Rounded corners */
-            font-family: monospace;    /* Use a monospaced font for JSON formatting */
-            font-size: 14px;           /* Optional: Adjust font size */
-            resize: both;             /* Allows the user to resize the text area */
+            width: 100%;
+            height: 200px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+
+        /* Button Styles */
+        button {
+            background-color: #5C6BC0;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #3f51b5;
+        }
+
+        /* Sample Payload Styling */
+        .sample-payload {
+            background-color: #f1f3f8;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .sample-payload pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
     </style>
 </head>
 <body>
-    <h1>Test Data Input</h1>
-    
-    <form id="testForm" action="http://localhost:8080/ping" method="POST">
-        <label for="dataInput">Enter JSON Data:</label><br>
-        <textarea id="dataInput" name="data" required placeholder="Enter your JSON here..."></textarea><br><br>
-        <button type="submit">Send Data</button>
-    </form>
-    <div>Here is a sample payload</div>
-    <div>{
+
+    <div class="container">
+        <h1>Test Data Input</h1>
+        
+        <!-- Form to submit JSON -->
+        <form id="testForm" action="http://localhost:8080/ping" method="POST">
+            <label for="dataInput">Enter JSON Data:</label><br>
+            <textarea id="dataInput" name="data" required placeholder="Enter your JSON here..."></textarea><br>
+            <button type="submit">Send Data</button>
+        </form>
+
+        <div class="sample-payload">
+            <h3>Sample Payload 1</h3>
+            <pre>{
     "plain": {
         "zip": 92651,
         "gender": "Female",
-        "marital_status":"Single"
+        "marital_status": "Single"
     },
     "hash": {
         "first_name": "Alice",
@@ -41,7 +104,27 @@
         "email": "alice.smith@email.com"
     },
     "endpoint": "http://localhost:8080/buyer"
-}</div>
+}</pre>
+        </div>
+
+        <div class="sample-payload">
+            <h3>Sample Payload 2 (second server)</h3>
+            <pre>{
+    "plain": {
+        "zip": 94022,
+        "gender": "Male",
+        "marital_status": "Married"
+    },
+    "hash": {
+        "first_name": "Bob",
+        "last_name": "Johnson",
+        "phone": 9876543210,
+        "email": "bob.johnson@email.com"
+    },
+    "endpoint": "http://localhost:4000/api"
+}</pre>
+        </div>
+    </div>
 
     <script>
         document.getElementById('testForm').addEventListener('submit', function(event) {
@@ -69,12 +152,13 @@
             .then(response => response.json())  // Assuming the response is JSON
             .then(data => {
                 console.log('Response:', data);  // Log the response from the server
+                // You can handle the server response here if needed, like displaying it
             })
             .catch(error => {
                 console.error('Error:', error);
             });
         });
     </script>
+
 </body>
 </html>
-
