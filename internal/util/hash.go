@@ -3,8 +3,8 @@ package util
 import (
 	"crypto/sha256"
 	"encoding/hex"
-  "strconv"
-  "fmt"
+  	"strconv"
+  	"fmt"
 )
 
 
@@ -24,17 +24,17 @@ func TransformAndFormat(p RawPayload) (map[string]interface{}, error) {
   for key, value := range p.Hash {
     var strValue string
    
-    // Type assertion: check if it's a string or int and convert to string
-		switch v := value.(type) {
-		case string:
-			strValue = v
-		case int:
-			strValue = strconv.Itoa(v) // Convert int to string
-    case float64:
-      strValue = fmt.Sprintf("%f", v) //convert float64 to string
-		default:
-			return nil, fmt.Errorf("unsupported value type for key '%s': %T", key, value)
-		}
+        // Type assertion to string
+        switch v := value.(type) {
+        case string:
+            strValue = v
+        case int:
+            strValue = strconv.Itoa(v)
+        case float64:
+            strValue = fmt.Sprintf("%f", v)
+        default:
+            return nil, fmt.Errorf("unsupported value type for key '%s': %T", key, value)
+            }
 
     hash := sha256.Sum256([]byte(strValue))
     pingBody[key] = hex.EncodeToString(hash[:]) 
@@ -42,4 +42,3 @@ func TransformAndFormat(p RawPayload) (map[string]interface{}, error) {
 
   return pingBody, nil
 }
-

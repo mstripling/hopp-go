@@ -1,11 +1,11 @@
 package server
 
 import (
-	"encoding/json"
-	"log"
-	"net/http"
-  "fmt"
-  "hopp/internal/util"
+    "encoding/json"
+    "log"
+    "net/http"
+    "fmt"
+    "hopp/internal/util"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -24,7 +24,8 @@ func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	resp["message"] = "Hello World"
 
 	jsonResp, err := json.Marshal(resp)
-	if err != nil {
+	
+    if err != nil {
 		log.Fatalf("error handling JSON marshal. Err: %v", err)
 	}
 
@@ -85,4 +86,3 @@ func (s *Server) VendorPingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 */
 }
-
