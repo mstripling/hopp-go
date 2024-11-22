@@ -3,8 +3,8 @@ package server
 import (
     "fmt"
     "net/http"
-    "os"
-    "strconv"
+    //"os"
+    //"strconv"
     "time"
     "log"
     
@@ -48,7 +48,7 @@ type Server struct {
 }
 
 func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	port := 80 //strconv.Atoi(os.Getenv("PORT"))
  
 	NewServer := &Server{
 		port: port,

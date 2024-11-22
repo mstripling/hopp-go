@@ -83,11 +83,15 @@
         <h1>Test Data Input</h1>
         
         <!-- Form to submit JSON -->
-        <form id="testForm" action="http://localhost:8080/ping" method="POST">
+        <form id="testForm" action="http://172.235.57.96/ping" method="POST">
             <label for="dataInput">Enter JSON Data:</label><br>
             <textarea id="dataInput" name="data" required placeholder="Enter your JSON here..."></textarea><br>
             <button type="submit">Send Data</button>
         </form>
+	<div class="response-log">
+		<h3>Response Log</h3>
+		<ul id="responseList"></ul>
+	</div>
 
         <div class="sample-payload">
             <h3>Sample Payload 1</h3>
@@ -103,7 +107,7 @@
         "phone": 1234567890,
         "email": "alice.smith@email.com"
     },
-    "endpoint": "http://localhost:8080/buyer"
+    "endpoint": "http://172.235.57.96/buyer"
 }</pre>
         </div>
 
@@ -121,7 +125,7 @@
         "phone": 9876543210,
         "email": "bob.johnson@email.com"
     },
-    "endpoint": "http://localhost:4000/api"
+    "endpoint": "http://172.235.57.96/buyer"
 }</pre>
         </div>
     </div>
@@ -142,20 +146,37 @@
             }
 
             // Send the JSON data to the server
-            fetch('http://localhost:8080/ping', {
+            fetch('http://172.235.57.96/ping', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',  // Set Content-Type to JSON
                 },
                 body: jsonData  // Send the raw JSON from the textarea
             })
-            .then(response => response.json())  // Assuming the response is JSON
+	    .then(response => {
+		const contentType = response.headers.get("Content-Type");
+		if (contentType && contentType.includes("application/json")) {return response.json();}
+		else {return response.text();}
+	    })  
             .then(data => {
                 console.log('Response:', data);  // Log the response from the server
                 // You can handle the server response here if needed, like displaying it
+		var responseList = document.getElementById('responseList');
+		var listItem = document.createElement('li');
+		if (typeof data === "object") {
+		listItem.textContent = JSON.stringify(data, null, 2);
+		}
+		else {
+		listItem.textContent = data;
+		}
+		responseList.appendChild(listItem);
             })
             .catch(error => {
                 console.error('Error:', error);
+		var responseList = document.getElementById('responseList');
+		var listItem = document.createElement('li');
+		listItem.textContent = 'Error: ' + error.message;
+		responseList.appendChild(listItem);
             });
         });
     </script>

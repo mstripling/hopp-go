@@ -11,7 +11,8 @@ import (
 type RawPayload struct {
 	Plain map[string]interface{} `json:"plain"`
 	Hash map[string]interface{}  `json:"hash"`
-  Endpoint string              `json:"endpoint"`
+  	Endpoint string              `json:"endpoint"`
+	Test bool 		     `json:"test,omitempty"`
 }
 
 

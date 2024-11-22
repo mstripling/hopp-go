@@ -50,9 +50,18 @@ func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) BuyerBidHandlerTest (w http.ResponseWriter, r *http.Request) {
+  var data map[string]interface{}
+  err := json.NewDecoder(r.Body).Decode(&data)
+    if err != nil {
+        http.Error(w, fmt.Sprintf("Invalid JSON: %s", err), http.StatusBadRequest)
+        return 
+    }
   resp := make(map[string]interface{})
+  if gender, ok := data["gender"]; ok && gender.(string) == "Female" {
+	resp["bid"] = 5
+  } else{resp["bid"] = 4}
   resp["pingID"] = 1234567890
-  resp["bid"] = 5
+
 
   jsonResp, err := json.Marshal(resp)
   if err != nil {
@@ -85,19 +94,22 @@ func (s *Server) VendorPingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}	
 
-  jsonData, err := json.Marshal(processedPayload)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error marshalling data: %v", err), http.StatusInternalServerError)
-		return
+	if vendorPayload.Test == true {
+		prettyjsonData, err := json.MarshalIndent(processedPayload, "","  ")
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Error marshalling data: %v", err), http.StatusInternalServerError)
+			return
+		}
+	  w.Write([]byte("Request processed successfully.....\n"))
+	  w.Write([]byte("Your Hopp payload (prettified):\n"))
+	  w.Write([]byte(prettyjsonData))
+	  w.Write([]byte("\nStandby for Buyer Response\n"))
+ 
 	}
 
-  // Return positive response to vendor
+// Return positive response to vendor
   w.WriteHeader(http.StatusOK)
-  w.Write([]byte("Request processed successfully.....\n"))
-  w.Write([]byte("Your Hopp payload:\n"))
-  w.Write([]byte(jsonData))
-  w.Write([]byte("\nStandby for Buyer Response\n"))
-  
+ 
   resp, err := util.Ping(r, processedPayload, vendorPayload.Endpoint)
   if err != nil {
     http.Error(w, fmt.Sprintf("HTTP request error: %s", err), http.StatusBadRequest)
