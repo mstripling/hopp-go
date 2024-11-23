@@ -32,4 +32,4 @@ setup_firewall.sh
 *.qqq
 
 # main binary
-main
+#main
