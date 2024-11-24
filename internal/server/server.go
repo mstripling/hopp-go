@@ -21,14 +21,14 @@ type responseWriter struct {
 }
 
 
-//TO DO Test this and possibly rewrite
+// TO DO Think of refactoring this
 func (rw *responseWriter) WriteHeader(statusCode int) {
     rw.statusCode = statusCode
     rw.ResponseWriter.WriteHeader(statusCode)
 }
 
 
-//Create Middleware func for logging. Maybe import something better later?
+// Create Middleware func for logging. Maybe import something better later?
 func logMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         startTime := time.Now()

@@ -85,52 +85,42 @@ func (s *Server) VendorPingHandler(w http.ResponseWriter, r *http.Request) {
     if err != nil {
       http.Error(w, fmt.Sprintf("%v", err), http.StatusInternalServerError)
       return 
-  }
+    }
   
-  // Now call the TransformAndFormat func to process the data
-	processedPayload, err := util.TransformAndFormat(vendorPayload)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error processing data: %s", err), http.StatusInternalServerError)
-		return
-	}	
+    // Now call the TransformAndFormat func to process the data
+    processedPayload, err := util.TransformAndFormat(vendorPayload)
+    if err != nil {
+      http.Error(w, fmt.Sprintf("Error processing data: %s", err), http.StatusInternalServerError)
+      return
+    }	
 
-	if vendorPayload.Test == true {
-		prettyjsonData, err := json.MarshalIndent(processedPayload, "","  ")
-		if err != nil {
-			http.Error(w, fmt.Sprintf("Error marshalling data: %v", err), http.StatusInternalServerError)
-			return
-		}
-	  w.Write([]byte("Request processed successfully.....\n"))
-	  w.Write([]byte("Your Hopp payload (prettified):\n"))
-	  w.Write([]byte(prettyjsonData))
-	  w.Write([]byte("\nStandby for Buyer Response\n"))
- 
-	}
+    if vendorPayload.Test == true {
+      prettyjsonData, err := json.MarshalIndent(processedPayload, "","  ")
+      if err != nil {
+        http.Error(w, fmt.Sprintf("Error marshalling data: %v", err), http.StatusInternalServerError)
+        return
+      }
+      w.Write([]byte("Request processed successfully.....\n"))
+      w.Write([]byte("Your Hopp payload (prettified):\n"))
+      w.Write([]byte(prettyjsonData))
+      w.Write([]byte("\nStandby for Buyer Response\n"))
+   
+    }
 
-// Return positive response to vendor
-  w.WriteHeader(http.StatusOK)
- 
-  resp, err := util.Ping(r, processedPayload, vendorPayload.Endpoint)
-  if err != nil {
-    http.Error(w, fmt.Sprintf("HTTP request error: %s", err), http.StatusBadRequest)
-    return
-  }
+    // Return positive response to vendor
+    w.WriteHeader(http.StatusOK)
+   
+    resp, err := util.Ping(r, processedPayload, vendorPayload.Endpoint)
+    if err != nil {
+      http.Error(w, fmt.Sprintf("HTTP request error: %s", err), http.StatusBadRequest)
+      return
+    }
 
-  w.WriteHeader(resp.StatusCode)
-  _, err = io.Copy(w, resp.Body)
-  if err != nil {
-    http.Error(w, fmt.Sprintf("Error copying response body: %s", err), http.StatusInternalServerError)
-    return
-  }
-
-  defer resp.Body.Close()
-/*
-	// Return the merged data as a single JSON object
-	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(processedPayload)
-  if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to encode response: %s", err), http.StatusInternalServerError)
-		return
-	}
-*/
+    w.WriteHeader(resp.StatusCode)
+    _, err = io.Copy(w, resp.Body)
+    if err != nil {
+      http.Error(w, fmt.Sprintf("Error copying response body: %s", err), http.StatusInternalServerError)
+      return
+    }
+    defer resp.Body.Close()
 }
