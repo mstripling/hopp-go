@@ -27,7 +27,7 @@ func Ping(r *http.Request, p *map[string]interface{}, e string) (*http.Response,
 
   resp, err := http.DefaultClient.Do(req)
   if err != nil {
-    return nil, err
+    return resp, err
   }
   return resp, nil
 }
