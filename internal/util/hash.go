@@ -16,7 +16,7 @@ type RawPayload struct {
 }
 
 
-func TransformAndFormat(p RawPayload) (map[string]interface{}, error) {
+func TransformAndFormat(p *RawPayload) (map[string]interface{}, error) {
   pingBody := make(map[string]interface{})
 
   for key, value := range p.Plain {

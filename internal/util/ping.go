@@ -6,7 +6,7 @@ import(
   "encoding/json"
 )
 
-func Ping(r *http.Request, p map[string]interface{}, e string) (*http.Response, error) {
+func Ping(r *http.Request, p *map[string]interface{}, e string) (*http.Response, error) {
 	// Convert the map to JSON
 	jsonData, err := json.Marshal(p)
 	if err != nil {

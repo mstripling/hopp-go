@@ -81,14 +81,15 @@ func (s *Server) VendorPingHandler(w http.ResponseWriter, r *http.Request) {
         return 
     }
     
-    err = util.Initialize(w, r, vendorPayload)
+    // Reference by pointer to init payload
+    err = util.Initialize(w, r, &vendorPayload)
     if err != nil {
       http.Error(w, fmt.Sprintf("%v", err), http.StatusInternalServerError)
       return 
     }
   
-    // Now call the TransformAndFormat func to process the data
-    processedPayload, err := util.TransformAndFormat(vendorPayload)
+    // Create new payload that has been processed
+    processedPayload, err := util.TransformAndFormat(&vendorPayload)
     if err != nil {
       http.Error(w, fmt.Sprintf("Error processing data: %s", err), http.StatusInternalServerError)
       return
@@ -106,11 +107,8 @@ func (s *Server) VendorPingHandler(w http.ResponseWriter, r *http.Request) {
       w.Write([]byte("\nStandby for Buyer Response\n"))
    
     }
-
-    // Return positive response to vendor
-    w.WriteHeader(http.StatusOK)
    
-    resp, err := util.Ping(r, processedPayload, vendorPayload.Endpoint)
+    resp, err := util.Ping(r, &processedPayload, vendorPayload.Endpoint)
     if err != nil {
       http.Error(w, fmt.Sprintf("HTTP request error: %s", err), http.StatusBadRequest)
       return

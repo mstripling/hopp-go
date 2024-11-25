@@ -5,7 +5,7 @@ import(
   "errors"
 )
 
-func Initialize(w http.ResponseWriter, r *http.Request, v RawPayload) error {
+func Initialize(w http.ResponseWriter, r *http.Request, v *RawPayload) error {
     if v.Endpoint == ""{
       return errors.New("No endpoint")
     }
