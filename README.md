@@ -15,8 +15,8 @@ Hash Ownership Ping Protocol (Hopp) implementation written in Go.
 
 
 ## 🚀 Future Goals
+#### - Better Docker functionality & Docker compose support
 #### - Add full API documentation.  
-#### - Plugin/API for CRM during Bid phase of ping post
 #### - Implement a CLI tool and GUI  
 
 
