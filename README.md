@@ -11,13 +11,13 @@ Hash Ownership Ping Protocol (Hopp) implementation written in Go.
 ## 🛠️ Current Work in Progress
 #### - Adding database support for integration testing.  
 #### - Better documentation.  
-#### - Endpoint redirects
 
 
 ## 🚀 Future Goals
 #### - Better Docker functionality & Docker compose support
 #### - Add full API documentation.  
 #### - Implement a CLI tool and GUI  
+#### - Authentication
 
 
 ## Makefile
