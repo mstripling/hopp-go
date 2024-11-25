@@ -50,6 +50,7 @@ func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) BuyerBidHandlerTest (w http.ResponseWriter, r *http.Request) {
+  //for local testing
   var data map[string]interface{}
   err := json.NewDecoder(r.Body).Decode(&data)
     if err != nil {

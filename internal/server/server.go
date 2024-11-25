@@ -21,7 +21,7 @@ type responseWriter struct {
 }
 
 
-// TO DO Think of refactoring this
+// Custom wrapper to always write the status code
 func (rw *responseWriter) WriteHeader(statusCode int) {
     rw.statusCode = statusCode
     rw.ResponseWriter.WriteHeader(statusCode)
@@ -48,7 +48,8 @@ type Server struct {
 }
 
 func NewServer() *http.Server {
-	portstr := os.Getenv("PORT")
+  //default to port 80 unless otherwise specified in Dockerfile	
+  portstr := os.Getenv("PORT")
   if portstr == ""{
     portstr = "80"
   }
