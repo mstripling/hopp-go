@@ -10,20 +10,19 @@ import (
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
-
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", s.HomeHandler)
-  mux.HandleFunc("/ping", s.VendorPingHandler)
-  mux.HandleFunc("/buyer", s.BuyerBidHandlerTest)
-	mux.HandleFunc("/health", s.healthHandler)
-	mux.HandleFunc("/hello", s.HelloWorldHandler)
+	mux.HandleFunc("/", s.HomeHandler)		// web interface testing
+	mux.HandleFunc("/ping", s.VendorPingHandler)	// endpoint vendors use
+	mux.HandleFunc("/buyer", s.BuyerBidHandlerTest) // handles web interface requests
+	mux.HandleFunc("/health", s.healthHandler) 	// Unused Currently
+	mux.HandleFunc("/hello", s.HelloWorldHandler) 	// Unused currently
 
 	return mux
 }
 
 func (s *Server) HomeHandler (w http.ResponseWriter, r *http.Request) {
-  path := "frontend/public/index.html"
-  http.ServeFile(w, r, path)
+	path := "frontend/public/index.html"
+	http.ServeFile(w, r, path)
 }
 
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,76 +49,75 @@ func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) BuyerBidHandlerTest (w http.ResponseWriter, r *http.Request) {
-  //for local testing
-  var data map[string]interface{}
-  err := json.NewDecoder(r.Body).Decode(&data)
-    if err != nil {
-        http.Error(w, fmt.Sprintf("Invalid JSON: %s", err), http.StatusBadRequest)
-        return 
-    }
-  resp := make(map[string]interface{})
-  if gender, ok := data["gender"]; ok && gender.(string) == "Female" {
-	resp["bid"] = 5
-  } else{resp["bid"] = 4}
-  resp["pingID"] = 1234567890
+	//for local testing
+	var data map[string]interface{}
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Invalid JSON: %s", err), http.StatusBadRequest)
+        	return 
+    	}
+	resp := make(map[string]interface{})
+	if gender, ok := data["gender"]; ok && gender.(string) == "Female" {
+		resp["bid"] = 5
+	} else{resp["bid"] = 4}
+	resp["pingID"] = 1234567890
 
 
-  jsonResp, err := json.Marshal(resp)
-  if err != nil {
-    log.Fatalf("Error handling JSON marshal. Err: %v", err)
-  }
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+	log.Fatalf("Error handling JSON marshal. Err: %v", err)
+	}
 
-  _, _ = w.Write(jsonResp)
+	_, _ = w.Write(jsonResp)
 }
 
 func (s *Server) VendorPingHandler(w http.ResponseWriter, r *http.Request) {
-    // Decode the JSON request body into the struct
-    var vendorPayload util.RawPayload
+	// Decode the JSON request body into the struct
+	var vendorPayload util.RawPayload
 
-    err := json.NewDecoder(r.Body).Decode(&vendorPayload)
-    if err != nil {
-        http.Error(w, fmt.Sprintf("Invalid JSON: %s", err), http.StatusBadRequest)
-        return 
-    }
+	err := json.NewDecoder(r.Body).Decode(&vendorPayload)
+	if err != nil {
+        	http.Error(w, fmt.Sprintf("Invalid JSON: %s", err), http.StatusBadRequest)
+        	return 
+    	}
     
-    // Reference by pointer to init payload
-    err = util.Initialize(w, r, &vendorPayload)
-    if err != nil {
-      http.Error(w, fmt.Sprintf("%v", err), http.StatusInternalServerError)
-      return 
-    }
+	// Reference by pointer to init payload
+	err = util.Initialize(w, r, &vendorPayload)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("%v", err), http.StatusInternalServerError)
+	return 
+    	}
   
-    // Create new payload that has been processed
-    processedPayload, err := util.TransformAndFormat(&vendorPayload)
-    if err != nil {
-      http.Error(w, fmt.Sprintf("Error processing data: %s", err), http.StatusInternalServerError)
-      return
-    }	
+	// Create new payload that has been processed
+	processedPayload, err := util.TransformAndFormat(&vendorPayload)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error processing data: %s", err), http.StatusInternalServerError)
+	return
+	}	
 
-    if vendorPayload.Test == true {
-      prettyjsonData, err := json.MarshalIndent(processedPayload, "","  ")
-      if err != nil {
-        http.Error(w, fmt.Sprintf("Error marshalling data: %v", err), http.StatusInternalServerError)
-        return
-      }
-      w.Write([]byte("Request processed successfully.....\n"))
-      w.Write([]byte("Your Hopp payload (prettified):\n"))
-      w.Write([]byte(prettyjsonData))
-      w.Write([]byte("\nStandby for Buyer Response\n"))
+	if vendorPayload.Test == true {
+		prettyjsonData, err := json.MarshalIndent(processedPayload, "","  ")
+		if err != nil {
+        	http.Error(w, fmt.Sprintf("Error marshalling data: %v", err), http.StatusInternalServerError)
+        	return
+		}
+		w.Write([]byte("Request processed successfully.....\n"))
+		w.Write([]byte("Your Hopp payload (prettified):\n"))
+		w.Write([]byte(prettyjsonData))
+		w.Write([]byte("\nStandby for Buyer Response\n"))
+    	}
    
-    }
-   
-    resp, err := util.Ping(r, &processedPayload, vendorPayload.Endpoint)
-    if err != nil {
-      http.Error(w, fmt.Sprintf("HTTP request error: %s", err), resp.StatusCode)
-      return
-    }
+	resp, err := util.Ping(r, &processedPayload, vendorPayload.Endpoint)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("HTTP request error: %s", err), resp.StatusCode)
+		return
+	}
 
-    w.WriteHeader(resp.StatusCode)
-    _, err = io.Copy(w, resp.Body)
-    if err != nil {
-      http.Error(w, fmt.Sprintf("Error copying response body: %s", err), http.StatusInternalServerError)
-      return
-    }
-    defer resp.Body.Close()
+	w.WriteHeader(resp.StatusCode)
+	_, err = io.Copy(w, resp.Body)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error copying response body: %s", err), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
 }
