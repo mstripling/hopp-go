@@ -111,7 +111,7 @@ func (s *Server) VendorPingHandler(w http.ResponseWriter, r *http.Request) {
    
     resp, err := util.Ping(r, &processedPayload, vendorPayload.Endpoint)
     if err != nil {
-      http.Error(w, fmt.Sprintf("HTTP request error: %s", err), http.StatusBadRequest)
+      http.Error(w, fmt.Sprintf("HTTP request error: %s", err), resp.StatusCode)
       return
     }
 
