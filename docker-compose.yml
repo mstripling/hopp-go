@@ -26,7 +26,7 @@ services:
       DB_USER: ${BLUEPRINT_DB_USERNAME}
       DB_PASSWORD: ${BLUEPRINT_DB_PASSWORD}
     ports:
-      - "8080:80"  # Map the container's port 80 to host port 8080
+      - "${HOPP_PORT}:80"  # Map the container's port 80 to host port 8080
     depends_on:
       - mysql_bp  # Wait for the MySQL container to be ready
     networks:
