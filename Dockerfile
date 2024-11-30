@@ -8,6 +8,15 @@ WORKDIR /app
 # Copy the entire application source code
 COPY . .
 
+# Install gettext package for envsubst
+RUN apt-get update && apt-get install -y gettext
+
+# Make the script executable
+RUN chmod +x generate-init.sh
+
+# Run the script to generate the `init.sql` file
+RUN ./generate-init.sh
+
 # Set the environment variable for the application port
 ENV PORT=80
 

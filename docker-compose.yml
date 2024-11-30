@@ -8,9 +8,34 @@ services:
       MYSQL_PASSWORD: ${BLUEPRINT_DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${BLUEPRINT_DB_ROOT_PASSWORD}
     ports:
-      - "${BLUEPRINT_DB_PORT}:3306"
+      - "${BLUEPRINT_DB_PORT}:3306"  # Bind MySQL container to a port on the host
     volumes:
       - mysql_volume_bp:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d  # Run init script
+    networks:
+      - hopp_network
+
+  app:
+    build:
+      context: .  # Path to your app's directory (Dockerfile should be here)
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql_bp  # Service name of the MySQL container
+      DB_PORT: 3306
+      DB_NAME: ${BLUEPRINT_DB_DATABASE}
+      DB_USER: ${BLUEPRINT_DB_USERNAME}
+      DB_PASSWORD: ${BLUEPRINT_DB_PASSWORD}
+    ports:
+      - "8080:80"  # Map the container's port 80 to host port 8080
+    depends_on:
+      - mysql_bp  # Wait for the MySQL container to be ready
+    networks:
+      - hopp_network
 
 volumes:
   mysql_volume_bp:
+
+networks:
+  hopp_network:
+    driver: bridge
+
