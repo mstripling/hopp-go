@@ -8,9 +8,12 @@ import (
 	"os"
 	"strconv"
 	"time"
+    "errors"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/joho/godotenv/autoload"
+    
+    "hopp/internal/util"
 )
 
 // Service represents a service that interacts with a database.
@@ -37,6 +40,12 @@ var (
 	dbInstance *service
 )
 
+type User struct {
+    Email string
+    HashedPassword string
+    Salt string
+}
+
 func New() Service {
 	// Reuse Connection
 	if dbInstance != nil {
@@ -44,7 +53,9 @@ func New() Service {
 	}
 
 	// Opening a driver typically will not attempt to connect to the database.
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, dbname))
+    dns := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, dbname)
+
+	db, err := sql.Open("mysql", dns)
 	if err != nil {
 		// This will not be a connection error, but a DSN parse error or
 		// another initialization error.
@@ -110,11 +121,56 @@ func (s *service) Health() map[string]string {
 	return stats
 }
 
+
+func (s *service) InsertNewUser(email string, password string) error {
+    _, err := s.GetUser(email)
+    if err == nil {
+        return errors.New("User with same email already exists")
+    }
+
+    stmt, err := s.db.Prepare("INSERT INTO users (email, salt, hashedPassword) VALUES (?, ?, ?)") // Prepare the statement
+    if err != nil {
+        return err
+    }
+
+    defer stmt.Close()
+
+    hashedPassword, salt := util.HashPassword(password)
+
+    _, err = stmt.Exec(email, salt, hashedPassword) // Execute the statement with parameters
+    if err != nil {
+        return err
+    }
+
+    return nil
+}
+
+func (s *service) GetUser(email string) (*User, error){
+    var user User
+    // Use QueryRow for fetching a single user by email
+    err := s.db.QueryRow("SELECT email, hashedPassword, salt FROM users WHERE email = ?", email).
+        Scan(&user.Email, &user.HashedPassword, &user.Salt)
+    
+    if err != nil {
+        if err == sql.ErrNoRows {
+            // Return nil and a custom error if no user is found
+            return nil, fmt.Errorf("user with email %s not found", email)
+        }
+        // Return other errors from the query
+        return nil, fmt.Errorf("error fetching user: %w", err)
+    }
+
+    return &user, nil
+}
+
+
+
+
 // Close closes the database connection.
 // It logs a message indicating the disconnection from the specific database.
 // If the connection is successfully closed, it returns nil.
 // If an error occurs while closing the connection, it returns the error.
 func (s *service) Close() error {
-	log.Printf("Disconnected from database: %s", dbname)
-	return s.db.Close()
+    log.Printf("Disconnected from database: %s", dbname)
+    return s.db.Close()
 }
