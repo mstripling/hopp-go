@@ -40,11 +40,7 @@ var (
 	dbInstance *service
 )
 
-type User struct {
-    Email string
-    HashedPassword string
-    Salt string
-}
+
 
 func New() Service {
 	// Reuse Connection
@@ -122,13 +118,13 @@ func (s *service) Health() map[string]string {
 }
 
 
-func (s *service) InsertNewUser(email string, password string) error {
+func (s *service) CreateNewUser(email string, password string) error {
     _, err := s.GetUser(email)
     if err == nil {
         return errors.New("User with same email already exists")
     }
 
-    stmt, err := s.db.Prepare("INSERT INTO users (email, salt, hashedPassword) VALUES (?, ?, ?)") // Prepare the statement
+    stmt, err := s.db.Prepare("INSERT INTO users (email, hashedPassword, salt) VALUES (?, ?, ?)") // Prepare the statement
     if err != nil {
         return err
     }
@@ -136,8 +132,9 @@ func (s *service) InsertNewUser(email string, password string) error {
     defer stmt.Close()
 
     hashedPassword, salt := util.HashPassword(password)
+    saltedHashedPassword, _ :=  util.HashPassword(fmt.Sprintf("%v%v",hashedPassword, salt))
 
-    _, err = stmt.Exec(email, salt, hashedPassword) // Execute the statement with parameters
+    _, err = stmt.Exec(email, saltedHashedPassword, salt) // Execute the statement with parameters
     if err != nil {
         return err
     }
@@ -146,7 +143,7 @@ func (s *service) InsertNewUser(email string, password string) error {
 }
 
 func (s *service) GetUser(email string) (*User, error){
-    var user User
+    var user util.User
     // Use QueryRow for fetching a single user by email
     err := s.db.QueryRow("SELECT email, hashedPassword, salt FROM users WHERE email = ?", email).
         Scan(&user.Email, &user.HashedPassword, &user.Salt)

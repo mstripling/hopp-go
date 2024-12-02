@@ -51,7 +51,7 @@ func HashPassword (p string) (string, string) {
     // Create seed for salt 
     rand.Seed(time.Now().UnixNano())
 
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:',.<>?/`~\""
+    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     length := 16
     var saltByte []byte
     for i:=0; i < length; i++ {

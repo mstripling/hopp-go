@@ -16,6 +16,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("/buyer", s.BuyerBidHandlerTest) // handles web interface requests
 	mux.HandleFunc("/health", s.healthHandler) 	// Unused Currently
 	mux.HandleFunc("/hello", s.HelloWorldHandler) 	// Unused currently
+	mux.HandleFunc("/login", s.LoginHandler) 	// Unused currently
+	mux.HandleFunc("/register", s.RegisterHandler) 	// Unused currently
+	mux.HandleFunc("/logout", s.LogoutHandler) 	// Unused currently
 
 	return mux
 }
@@ -121,3 +124,80 @@ func (s *Server) VendorPingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 }
+
+
+func (s *Server) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPost {
+        http.Error(w, "Invalid Method", http.StatusMethodNotAllowed)
+        return
+    }
+
+    email := r.FormValue("email")
+    password := r.FormValue("password")
+    if len(username) < 8 || len(password) < 8 {
+        http.Error(w, "Invalid username or password", http.StatusNotAcceptable)
+        return
+    }
+    
+    _, err := database.GetUser(email)
+    if err == nil {
+        http.Error(w, "User with \"%v\" email already exists", http.StatusConflict)
+        return
+    }
+
+    err = database.CreateNewUser(email, password)
+    if err != nil {
+        http.Error(w, "Problem creating new user", http.StatusInternalServerError)
+    }
+    return
+}
+
+func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPost {
+        http.Error(w, "Invalid Method", http.StatusMethodNotAllowed)
+        return
+    }
+
+    email := r.FormValue("email")
+    password := r.FormValue("password")
+    if len(username) < 8 || len(password) < 8 {
+        http.Error(w, "Invalid username or password", http.StatusNotAcceptable)
+        return
+    }
+
+    user, err := database.GetUser(email)
+    hashedPassword, _ := util.HashPassword(password)
+    saltedHashedPassword, _ := util.HashPassword(fmt.Sprintf("%v%v",hashedPassword, user.Salt))
+
+    if err != nil || saltedHashedPassword != user.SaltedHashedPassword {
+        http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+    }
+
+    
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
