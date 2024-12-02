@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
     "errors"
+    "net/http"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/joho/godotenv/autoload"
@@ -21,6 +22,11 @@ type Service interface {
 	// Health returns a map of health status information.
 	// The keys and values in the map are service-specific.
 	Health() map[string]string
+
+
+    CreateNewUser(email string, password string) error
+    GetUser(email string) (*User, error)
+    Authorize(r *http.Request) error 
 
 	// Close terminates the database connection.
 	// It returns an error if the connection cannot be closed.
@@ -143,10 +149,10 @@ func (s *service) CreateNewUser(email string, password string) error {
 }
 
 func (s *service) GetUser(email string) (*User, error){
-    var user util.User
+    var user User
     // Use QueryRow for fetching a single user by email
-    err := s.db.QueryRow("SELECT email, hashedPassword, salt FROM users WHERE email = ?", email).
-        Scan(&user.Email, &user.HashedPassword, &user.Salt)
+    err := s.db.QueryRow("SELECT email, saltedHashedPassword, salt, sessionToken, csrfToken FROM users WHERE email = ?", email).
+        Scan(&user.Email, &user.SaltedHashedPassword, &user.Salt, &user.sessionToken, &user.csrfToken)
     
     if err != nil {
         if err == sql.ErrNoRows {

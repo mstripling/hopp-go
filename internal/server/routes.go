@@ -7,6 +7,9 @@ import (
     "fmt"
     "io"
     "hopp/internal/util"
+    "time"
+
+    "hopp/internal/database"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -14,11 +17,12 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("/", s.HomeHandler)		// web interface testing
 	mux.HandleFunc("/ping", s.VendorPingHandler)	// endpoint vendors use
 	mux.HandleFunc("/buyer", s.BuyerBidHandlerTest) // handles web interface requests
-	mux.HandleFunc("/health", s.healthHandler) 	// Unused Currently
-	mux.HandleFunc("/hello", s.HelloWorldHandler) 	// Unused currently
+	mux.HandleFunc("/health", s.healthHandler) 	// Provides Database connection stats
+	mux.HandleFunc("/hello", s.HelloWorldHandler) 	// returns hellow world as json
 	mux.HandleFunc("/login", s.LoginHandler) 	// Unused currently
 	mux.HandleFunc("/register", s.RegisterHandler) 	// Unused currently
 	mux.HandleFunc("/logout", s.LogoutHandler) 	// Unused currently
+	mux.HandleFunc("/protected", s.ProtectedHandler) 	// Unused currently
 
 	return mux
 }
@@ -127,6 +131,13 @@ func (s *Server) VendorPingHandler(w http.ResponseWriter, r *http.Request) {
 
 
 func (s *Server) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+     if r.Method == http.MethodGet {
+        // Serve the HTML form
+        path := "frontend/public/register.html"
+        http.ServeFile(w, r, path)
+        return
+    }
+
     if r.Method != http.MethodPost {
         http.Error(w, "Invalid Method", http.StatusMethodNotAllowed)
         return
@@ -134,20 +145,21 @@ func (s *Server) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
     email := r.FormValue("email")
     password := r.FormValue("password")
-    if len(username) < 8 || len(password) < 8 {
-        http.Error(w, "Invalid username or password", http.StatusNotAcceptable)
+    if len(email) < 8 || len(password) < 8 {
+        http.Error(w, "Invalid emailor password", http.StatusNotAcceptable)
         return
     }
     
-    _, err := database.GetUser(email)
+    _, err := s.db.GetUser(email)
     if err == nil {
         http.Error(w, "User with \"%v\" email already exists", http.StatusConflict)
         return
     }
 
-    err = database.CreateNewUser(email, password)
+    err = s.db.CreateNewUser(email, password)
     if err != nil {
         http.Error(w, "Problem creating new user", http.StatusInternalServerError)
+        fmt.Println("Problem creating new user", err)
     }
     return
 }
@@ -160,28 +172,89 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
     email := r.FormValue("email")
     password := r.FormValue("password")
-    if len(username) < 8 || len(password) < 8 {
-        http.Error(w, "Invalid username or password", http.StatusNotAcceptable)
+    if len(email) < 8 || len(password) < 8 {
+        http.Error(w, "Invalid email or password", http.StatusNotAcceptable)
         return
     }
 
-    user, err := database.GetUser(email)
+    user, err := s.db.GetUser(email)
     hashedPassword, _ := util.HashPassword(password)
     saltedHashedPassword, _ := util.HashPassword(fmt.Sprintf("%v%v",hashedPassword, user.Salt))
 
     if err != nil || saltedHashedPassword != user.SaltedHashedPassword {
-        http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+        http.Error(w, "Invalid email or password", http.StatusUnauthorized)
     }
 
-    
+    sessionToken := database.GenerateToken(32)
+    csrfToken := database.GenerateToken(32)
 
+    http.SetCookie(w, &http.Cookie{
+        Name: "session_token",
+        Value: sessionToken,
+        Expires: time.Now().Add(24 * time.Hour),
+        HttpOnly: true,
+    })
 
+    http.SetCookie(w, &http.Cookie{
+        Name: "csrf_token",
+        Value: csrfToken,
+        Expires: time.Now().Add(24 * time.Hour),
+        HttpOnly: false,
+    })
+
+    // Need to update it in the db as well
+    user.SessionToken = sessionToken
+    user.CSRFToken= csrfToken
+
+    fmt.Println("Login successfull")
 
 }
 
 
+func (s *Server) ProtectedHandler(w http.ResponseWriter, r *http.Request){
+    if r.Method != http.MethodPost {
+        http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+        return
+    }
+
+    if err := s.db.Authorize(r); err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    email := r.FormValue("email") 
+    fmt.Fprintf(w, "CSRF Validation successful! Welcome, %s", email) 
+}
 
 
+func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request){
+    if err := s.db.Authorize(r); err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    http.SetCookie(w, &http.Cookie{
+        Name: "session_token",
+        Value: "",
+        Expires: time.Now().Add(-time.Hour),
+        HttpOnly: true,
+    })
+
+    http.SetCookie(w, &http.Cookie{
+        Name: "csrf_token",
+        Value: "",
+        Expires: time.Now().Add(-time.Hour),
+        HttpOnly: false,
+    })
+
+    email := r.FormValue("email")
+    user, _ := s.db.GetUser(email)
+
+    // Need to update it in the db as well
+    user.SessionToken = ""
+    user.CSRFToken= ""
+
+}
 
 
 
