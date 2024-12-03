@@ -27,9 +27,12 @@ go.work.sum
 # Docker ignore
 .dockerignore
 setup_firewall.sh
+generate-init.sh
+post_test.sh
+internal/util/vendor.json
 
 # local notes
 *.qqq
 
 # main binary
-#main
+main
