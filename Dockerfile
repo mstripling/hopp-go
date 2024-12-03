@@ -1,28 +1,30 @@
 
-# Use the Go image as the base
-FROM golang:latest
+FROM golang:1.23.3-alpine3.19 AS build
 
-# Set the working directory
+# Update repositories
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk update \
+    && apk add --no-cache curl
+
+RUN apk add --no-cache curl
+
 WORKDIR /app
 
-# Copy the entire application source code
+COPY go.mod go.sum ./
+
+RUN go mod download
+
 COPY . .
 
-# Install gettext package for envsubst
-#RUN apt-get update && apt-get install -y gettext
+RUN go build -o main cmd/api/main.go
 
-# Make the script executable
-#RUN chmod +x generate-init.sh
+FROM alpine:3.20.1 AS prod
 
-# Run the script to generate the `init.sql` file
-#RUN ./generate-init.sh
+WORKDIR /app
 
-# Set the environment variable for the application port
-ENV PORT=80
+COPY --from=build /app/main /app/main
+COPY --from=build /app/frontend /app/frontend
 
-# Expose the port
-EXPOSE 80
-
-# Command to run the application
-ENTRYPOINT ["/app/main"]
+EXPOSE ${PORT}
+CMD ["./main"]
 

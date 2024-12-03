@@ -152,7 +152,7 @@ func (s *service) GetUser(email string) (*User, error){
     var user User
     // Use QueryRow for fetching a single user by email
     err := s.db.QueryRow("SELECT email, saltedHashedPassword, salt, sessionToken, csrfToken FROM users WHERE email = ?", email).
-        Scan(&user.Email, &user.SaltedHashedPassword, &user.Salt, &user.sessionToken, &user.csrfToken)
+        Scan(&user.Email, &user.SaltedHashedPassword, &user.Salt, &user.SessionToken, &user.CSRFToken)
     
     if err != nil {
         if err == sql.ErrNoRows {
