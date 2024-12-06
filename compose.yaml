@@ -1,11 +1,7 @@
 
-
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: prod
+    image: ghcr.io/mstripling/hopp:latest
     restart: unless-stopped
     ports:
       - ${PORT}:${PORT}
