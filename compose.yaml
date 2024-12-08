@@ -4,47 +4,46 @@ services:
     image: ghcr.io/mstripling/hopp:latest
     restart: unless-stopped
     ports:
-      - ${PORT}:${PORT}
+      - ${HOPP_PORT}:${HOPP_PORT}
     environment:
-      APP_ENV: ${APP_ENV}
-      PORT: ${PORT}
-      BLUEPRINT_DB_HOST: mysql_bp
-      BLUEPRINT_DB_PORT: ${BLUEPRINT_DB_PORT}
-      BLUEPRINT_DB_DATABASE: ${BLUEPRINT_DB_DATABASE}
-      BLUEPRINT_DB_USERNAME: ${BLUEPRINT_DB_USERNAME}
-      BLUEPRINT_DB_PASSWORD: ${BLUEPRINT_DB_PASSWORD}
+      HOPP_PORT: ${HOPP_PORT}
+      HOPP_DB_HOST: mysql_hopp
+      HOPP_DB_PORT: ${HOPP_DB_PORT}
+      HOPP_DB_DATABASE: ${HOPP_DB_DATABASE}
+      HOPP_DB_USERNAME: ${HOPP_DB_USERNAME}
+      HOPP_DB_PASSWORD: ${HOPP_DB_PASSWORD}
     env_file:
       - .env
     depends_on:
-      mysql_bp:
+      mysql_hopp:
         condition: service_healthy
     networks:
-      - blueprint
-  mysql_bp:
+      - hopp
+  mysql_hopp:
     image: mysql:latest
     restart: unless-stopped
     env_file:
       - .env
     environment:
-      MYSQL_DATABASE: ${BLUEPRINT_DB_DATABASE}
-      MYSQL_USER: ${BLUEPRINT_DB_USERNAME}
-      MYSQL_PASSWORD: ${BLUEPRINT_DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${BLUEPRINT_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${HOPP_DB_DATABASE}
+      MYSQL_USER: ${HOPP_DB_USERNAME}
+      MYSQL_PASSWORD: ${HOPP_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${HOPP_DB_ROOT_PASSWORD}
     ports:
-      - "${BLUEPRINT_DB_PORT}:3306"
+      - "${HOPP_DB_PORT}:3306"
     volumes:
-      - mysql_volume_bp:/var/lib/mysql
+      - mysql_volume_hopp:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "${BLUEPRINT_DB_HOST}", "-u", "${BLUEPRINT_DB_USERNAME}", "--password=${BLUEPRINT_DB_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "mysql_hopp", "-u", "${HOPP_DB_USERNAME}", "--password=${HOPP_DB_PASSWORD}"]
       interval: 5s
       timeout: 5s
       retries: 3
       start_period: 15s
     networks:
-      - blueprint
+      - hopp
 
 volumes:
-  mysql_volume_bp:
+  mysql_volume_hopp:
 networks:
-  blueprint:
+  hopp:
 
