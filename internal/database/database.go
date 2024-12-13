@@ -14,7 +14,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/joho/godotenv/autoload"
     
-    "hopp/internal/util"
+    "hopp-go/internal/util"
 )
 
 // Service represents a service that interacts with a database.

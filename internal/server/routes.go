@@ -6,10 +6,10 @@ import (
     "net/http"
     "fmt"
     "io"
-    "hopp/internal/util"
+    "hopp-go/internal/util"
     "time"
 
-    "hopp/internal/database"
+    "hopp-go/internal/database"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
